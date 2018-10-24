@@ -1,18 +1,27 @@
 #!/bin/bash
 
-REPO="https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/"
-OS="coreos"
-HELM_BIN="/usr/local/bin"
+echo "Setting up variables..."
+ACCOUNT=$(gcloud info --format='value(config.account)')
+NSPACE="monitoring"
 
-$HELM_BIN/helm repo add coreos "$REPO"
+echo "You are looged in as: $ACCOUNT"
 
-$HELM_BIN/helm install --name prometheus-operator --namespace monitoring --set rbacEnable=false coreos/prometheus-operator
 
-echo "###### Checking Operators ######"
 
-kubectl get CustomResourceDefinition
+echo "Creating cluster role binding..."
+kubectl create clusterrolebinding owner-cluster-admin-binding --clusterrole cluster-admin --user $ACCOUNT
 
-echo "###### Installing Prometheus ######"
+echo "Creating namespace..."
+kubectl create namespace $MONITORING
 
-helm install --name mon --namespace monitoring -f custom-values.yaml coreos/kube-prometheus
+echo "Creating a role..."
+kubectl create -f ./clusterRole.yaml
 
+echo "Creating a config map..."
+kubectl create -f ./config-map.yaml -n $NSPACE
+
+echo "Creating Prometheus deployment..."
+kubectl create  -f ./prometheus-deployment.yaml --namespace=$NSPACE
+
+echo "Creating Prometheus service..."
+kubectl create -f prometheus-service.yaml --namespace=$NSPACE
