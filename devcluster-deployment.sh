@@ -28,3 +28,6 @@ kubectl create namespace $NM_MONITORING
 
 echo "Applying quotas to the namespace $NM_LIMITS"
 kubectl apply --namespace=limits -f ./nm-quotas.yaml
+
+echo "Creating SSD PV"
+kubectl apply -f volumes/ssd.yaml
