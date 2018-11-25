@@ -17,6 +17,13 @@ spec:
         image: nginx:1.7.9
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name: nginx-www
+          mountPath: /var/www
+      volumes:
+        - name: nginx-www
+          persistentVolumeClaim:
+            claimName: nginx-claim-www
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
